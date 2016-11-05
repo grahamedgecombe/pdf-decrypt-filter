@@ -1,0 +1,85 @@
+#!/usr/bin/env perl
+
+# Copyright (c) 2016 Graham Edgecombe <gpe@grahamedgecombe.com>
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+use strict;
+use warnings;
+
+use File::Slurp;
+use File::Temp qw(tempdir tempfile);
+use Getopt::Long;
+use MIME::Entity;
+use MIME::Parser;
+
+GetOptions(
+    '--purge'      => \my $purge,
+    '--password=s' => \my $password
+) or exit 1;
+
+exit 1 unless $password;
+
+my $parser = MIME::Parser->new;
+$parser->output_dir(tempdir(CLEANUP => 1));
+
+my $message = $parser->parse(\*STDIN);
+
+my $type = $message->head->mime_attr('Content-Type');
+if ($type eq 'multipart/mixed') {
+    my @parts;
+
+    foreach my $part ($message->parts) {
+        $type = $part->head->mime_attr('Content-Type');
+
+        if ($type eq 'application/pdf') {
+            push @parts, $part unless $purge;
+            push @parts, decrypt_pdf($part);
+        } else {
+            push @parts, $part;
+        }
+    }
+
+    $message->parts(\@parts);
+}
+
+$message->print(\*STDOUT);
+
+sub decrypt_pdf {
+    my $part = shift;
+
+    my $name = $part->head->recommended_filename;
+    my $body = $part->bodyhandle;
+
+    my $in;
+
+    if ($body->path) {
+        $in = $body->path;
+    } else {
+        (undef, $in) = tempfile(CLEANUP => 1);
+        write_file($in, { binmode => ':raw' }, $body->as_string);
+    }
+
+    my (undef, $out) = tempfile(CLEANUP => 1);
+
+    system('pdftk', $in, 'input_pw', $password, 'output', $out) == 0
+        or die "pdftk failed: $!";
+
+    return MIME::Entity->build(
+        Filename    => $name,
+        Type        => 'application/pdf',
+        Disposition => 'attachment',
+        Top         => 0,
+        Path        => $out
+    );
+}
