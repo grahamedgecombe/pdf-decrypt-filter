@@ -32,6 +32,8 @@ override this behaviour and remove the encrypted PDF attachment.
 
 * Only supports a single password.
 * The entire script will fail if the password is incorrect.
+* Assumes the mail is a single `multipart/mixed` part directly containing one or
+  more `application/pdf` attachments.
 
 ## Dependencies
 
