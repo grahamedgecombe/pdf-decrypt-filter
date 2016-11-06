@@ -38,7 +38,6 @@ override this behaviour and remove the encrypted PDF attachment.
 ## Dependencies
 
 * [Perl 5][perl]
-* [File::MMagic][mmagic]
 * [File::Slurp][slurp]
 * [MIME::Tools][mimetools]
 * [pdftk][pdftk]
@@ -50,7 +49,6 @@ which is similar to the 2-clause BSD license. See the `LICENSE` file for the
 copyright information and licensing terms.
 
 [perl]: https://www.perl.org/
-[mmagic]: https://metacpan.org/pod/File::MMagic
 [slurp]: https://metacpan.org/pod/File::Slurp
 [mimetools]: https://metacpan.org/pod/MIME::Tools
 [pdftk]: https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/
