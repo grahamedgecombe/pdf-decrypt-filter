@@ -1,6 +1,6 @@
 #!/usr/bin/env perl
 
-# Copyright (c) 2016 Graham Edgecombe <gpe@grahamedgecombe.com>
+# Copyright (c) 2016, 2019 Graham Edgecombe <gpe@grahamedgecombe.com>
 #
 # Permission to use, copy, modify, and/or distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -72,8 +72,8 @@ sub decrypt_pdf {
 
     my (undef, $out) = tempfile(CLEANUP => 1);
 
-    system('pdftk', $in, 'input_pw', $password, 'output', $out) == 0
-        or die "pdftk failed: $!";
+    system('qpdf', '--decrypt', "--password=$password", $in, $out) == 0
+        or die "qpdf failed: $!";
 
     return MIME::Entity->build(
         Filename    => $name,

@@ -40,7 +40,7 @@ override this behaviour and remove the encrypted PDF attachment.
 * [Perl 5][perl]
 * [File::Slurp][slurp]
 * [MIME::Tools][mimetools]
-* [pdftk][pdftk]
+* [qpdf][qpdf]
 
 ## License
 
@@ -51,5 +51,5 @@ copyright information and licensing terms.
 [perl]: https://www.perl.org/
 [slurp]: https://metacpan.org/pod/File::Slurp
 [mimetools]: https://metacpan.org/pod/MIME::Tools
-[pdftk]: https://www.pdflabs.com/tools/pdftk-the-pdf-toolkit/
+[qpdf]: http://qpdf.sourceforge.net/
 [isc]: https://www.isc.org/downloads/software-support-policy/isc-license/
